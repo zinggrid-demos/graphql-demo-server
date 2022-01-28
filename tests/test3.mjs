@@ -1,7 +1,8 @@
 /* Test: update entry with id == 2 */
 import fetch from 'node-fetch'
+import url from './config.mjs'
 
-fetch('http://localhost:4000/graphql', {
+fetch(url, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
