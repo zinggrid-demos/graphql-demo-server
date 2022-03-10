@@ -1,20 +1,45 @@
-
-> tuql server@0.0.1 schema
-> tuql --db reset.sqlite --schema
-
 type GenericResponse {
   success: Boolean
+}
+
+type Level {
+  id: Int!
+  name: String
+  rank: Int
+  shows(
+    limit: Int
+    order: String
+
+    """
+    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
+    """
+    where: SequelizeJSON
+    offset: Int
+  ): [Show]
+  users(
+    limit: Int
+    order: String
+
+    """
+    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
+    """
+    where: SequelizeJSON
+    offset: Int
+  ): [User]
 }
 
 type Mutation {
   createRating(userId: Int, showId: Int, rating: Float): Rating
   updateRating(id: Int, userId: Int, showId: Int, rating: Float): Rating
   deleteRating(id: Int!): GenericResponse
-  createShow(title: String, seasons: Int, provider: String, genre: String, suitability: String): Show
-  updateShow(id: Int, title: String, seasons: Int, provider: String, genre: String, suitability: String): Show
+  createLevel(name: String, rank: Int): Level
+  updateLevel(id: Int, name: String, rank: Int): Level
+  deleteLevel(id: Int!): GenericResponse
+  createShow(title: String, seasons: Int, provider: String, genre: String, levelId: Int): Show
+  updateShow(id: Int, title: String, seasons: Int, provider: String, genre: String, levelId: Int): Show
   deleteShow(id: Int!): GenericResponse
-  createUser(username: String!, password: String, suitability: String, admin: Int): User
-  updateUser(id: Int, username: String, password: String, suitability: String, admin: Int): User
+  createUser(username: String!, password: String, admin: Int, levelId: Int): User
+  updateUser(id: Int, username: String, password: String, admin: Int, levelId: Int): User
   deleteUser(id: Int!): GenericResponse
 }
 
@@ -37,6 +62,24 @@ type Query {
     """
     where: SequelizeJSON
   ): Rating
+  levels(
+    limit: Int
+    order: String
+
+    """
+    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
+    """
+    where: SequelizeJSON
+    offset: Int
+  ): [Level]
+  level(
+    id: Int
+
+    """
+    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
+    """
+    where: SequelizeJSON
+  ): Level
   shows(
     limit: Int
     order: String
@@ -93,7 +136,7 @@ type Show {
   seasons: Int
   provider: String
   genre: String
-  suitability: String
+  levelId: Int
   ratings(
     limit: Int
     order: String
@@ -104,14 +147,15 @@ type Show {
     where: SequelizeJSON
     offset: Int
   ): [Rating]
+  level: Level
 }
 
 type User {
   id: Int!
   username: String!
   password: String
-  suitability: String
   admin: Int
+  levelId: Int
   ratings(
     limit: Int
     order: String
@@ -122,129 +166,5 @@ type User {
     where: SequelizeJSON
     offset: Int
   ): [Rating]
-}
-
-> tuql server@0.0.1 schema
-> tuql --db reset.sqlite --schema
-
-type GenericResponse {
-  success: Boolean
-}
-
-type Mutation {
-  createRating(userId: Int, showId: Int, rating: Float): Rating
-  updateRating(id: Int, userId: Int, showId: Int, rating: Float): Rating
-  deleteRating(id: Int!): GenericResponse
-  createShow(title: String, seasons: Int, provider: String, genre: String, suitability: String): Show
-  updateShow(id: Int, title: String, seasons: Int, provider: String, genre: String, suitability: String): Show
-  deleteShow(id: Int!): GenericResponse
-  createUser(username: String!, password: String, suitability: String, admin: Int): User
-  updateUser(id: Int, username: String, password: String, suitability: String, admin: Int): User
-  deleteUser(id: Int!): GenericResponse
-}
-
-type Query {
-  ratings(
-    limit: Int
-    order: String
-
-    """
-    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
-    """
-    where: SequelizeJSON
-    offset: Int
-  ): [Rating]
-  rating(
-    id: Int
-
-    """
-    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
-    """
-    where: SequelizeJSON
-  ): Rating
-  shows(
-    limit: Int
-    order: String
-
-    """
-    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
-    """
-    where: SequelizeJSON
-    offset: Int
-  ): [Show]
-  show(
-    id: Int
-
-    """
-    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
-    """
-    where: SequelizeJSON
-  ): Show
-  users(
-    limit: Int
-    order: String
-
-    """
-    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
-    """
-    where: SequelizeJSON
-    offset: Int
-  ): [User]
-  user(
-    id: Int
-
-    """
-    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
-    """
-    where: SequelizeJSON
-  ): User
-}
-
-type Rating {
-  id: Int!
-  userId: Int
-  showId: Int
-  rating: Float
-  user: User
-  show: Show
-}
-
-"""The `JSON` scalar type represents raw JSON as values."""
-scalar SequelizeJSON
-
-type Show {
-  id: Int!
-  title: String
-  seasons: Int
-  provider: String
-  genre: String
-  suitability: String
-  ratings(
-    limit: Int
-    order: String
-
-    """
-    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
-    """
-    where: SequelizeJSON
-    offset: Int
-  ): [Rating]
-}
-
-type User {
-  id: Int!
-  username: String!
-  password: String
-  suitability: String
-  admin: Int
-  ratings(
-    limit: Int
-    order: String
-
-    """
-    A JSON object conforming the the shape specified in http://docs.sequelizejs.com/en/latest/docs/querying/
-    """
-    where: SequelizeJSON
-    offset: Int
-  ): [Rating]
+  level: Level
 }
